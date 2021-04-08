@@ -1,5 +1,7 @@
 <template>
   <div id="app">
+  <h1>Trello Board</h1>
+  <hr>
     <HelloWorld msg="Welcome to Your Vue.js App"/>
   </div>
 </template>
@@ -22,6 +24,6 @@ export default {
   -moz-osx-font-smoothing: grayscale;
   text-align: center;
   color: #2c3e50;
-  margin-top: 60px;
+  margin-top: 6px;
 }
 </style>

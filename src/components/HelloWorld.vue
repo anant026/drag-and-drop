@@ -1,6 +1,6 @@
 <template>
   <div class="container mt-5">
-    <div class="row">
+    <div >
       <div class="col form-inline">
         <b-form-input
           id="input-2"
@@ -9,7 +9,7 @@
           placeholder="Add List"
           @keyup.enter="add"
         ></b-form-input>
-        <b-button @click="add" variant="primary" class="ml-3">Add</b-button>
+        <b-button @click="add" variant="primary" class="ml-3">Add List</b-button>
       </div>
     </div>
     <div class="row mt-5">
@@ -17,8 +17,6 @@
         <div class="p-2 alert alert-primary">
          <button @click="deleteList(index)" style="float: right;">x</button>
           <h3>{{ele[0].title}}</h3>
-         
-          <!-- In Progress draggable component. Pass arrInProgress to list prop -->
           <draggable
             class="list-group kanban-column"
             :list="ele[1]"
@@ -31,15 +29,28 @@
             >
              <b-button @click="deleteCard(index,element)" style="float: right;">x</b-button>
               {{ element.title }}
+              <br/>
               {{element.dec}}
              
             </div>
           </draggable>
-          
-          <button @click="addTask(index,$event)" style="border-radius: 50%;">+</button>
+          <button @click="addTask(index)" style="border-radius: 50%;"  v-b-modal.modal-1>+</button>
         </div>
       </div>
     </div>
+    <b-modal id="modal-1" title="Add List Card Details" hide-footer ref="my-modal">
+   <b-form-input
+          v-model="taskTitle"
+          required
+          placeholder="Add Title"
+        ></b-form-input>
+         <b-form-input
+          v-model="taskDes"
+          required
+          placeholder="Add Description"
+        ></b-form-input>
+         <b-button @click="addTaskToList()"  variant="primary" class="ml-3">Add</b-button>
+  </b-modal>
   </div>
 </template>
 
@@ -56,19 +67,10 @@ export default {
   },
   data() {
     return {
-      // for new tasks
       newTask: "",
-      taskName:"",
-      // 4 arrays to keep track of our 4 statuses
-      arrBackLog: [
-        { title: "Code Sign Up Page" },
-        { title: "Test Dashboard" },
-        { title: "Style Registration" },
-        { title: "Help with Designs" }
-      ],
-      arrInProgress: [],
-      arrTested: [],
-      arrDone: [],
+      taskTitle:"",
+      taskDes: "",
+      index :0,
       list:[[{title:"Product"},[
         { title: "Code Sign Up Page" ,dec:"small description"},
         { title: "Test Dashboard" ,dec:"small description"},
@@ -79,29 +81,46 @@ export default {
       ]]]
     };
   },
+   mounted() {
+    if (localStorage.name) {
+      console.log("hi")
+      this.list=JSON.parse(localStorage.getItem('name'));
+    }
+  },
+  beforeUnmounted() {
+    localStorage.name = this.list;
+  },
   methods: {
-    //add new tasks method
     add() {
       if (this.newTask) {
-        const s=this.newTask
-        this.list.push([{title:s},[
+        this.list.push([{title:this.newTask},[
       ]]);
         this.newTask = "";
       }
+     localStorage.setItem('name', JSON.stringify(this.list));
     },
     deleteList(value) {
       this.list.splice(value,1);
+      localStorage.setItem('name', JSON.stringify(this.list));
     },
     deleteCard(value,ele) {
-      console.log(value,ele)
-      const c=this.list[value][1].findIndex(((item) => item.name == ele.name))
-      console.log(c)
+      console.log(value,ele);
+      const c=this.list[value][1].findIndex(((item) => item.title == ele.title));
       this.list[value][1].splice(c,1);
+       localStorage.setItem('name', JSON.stringify(this.list));
     },
-    addTask(value,e) {
-      console.log(e.target.value)
-      this.list[value][1].push( { name: this.taskName });
-      this.taskName="";
+    addTask(value) {
+      this.index=value;
+    },
+    addTaskToList() {
+      if(this.taskDes && this.taskTitle) {
+         this.list[this.index][1].push( { title: this.taskTitle,dec:this.taskDes });
+      }
+     
+      this.$refs['my-modal'].hide();
+      this.taskTitle="";
+      this.taskDes="";
+       localStorage.setItem('name', JSON.stringify(this.list));
     }
   }
 }
